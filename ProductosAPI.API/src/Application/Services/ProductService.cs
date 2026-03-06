@@ -85,29 +85,31 @@ public class ProductService
         return true;
     }
 
- public async Task<(int Inserted, string Message)> BulkCreateAsync(BulkCreateProductDto dto)
+public async Task<(int Inserted, string Message)> BulkCreateAsync(BulkCreateProductDto dto)
+{
+    if (!await _db.Categories.AnyAsync(c => c.Id == dto.CategoryId))
+        throw new Exception("Category not found");
+    var rng = new Random();
+    const int batchSize = 1000;
+    var inserted = 0;
+    for (var i = 0; i < dto.Count; i += batchSize)
     {
-        if (!await _db.Categories.AnyAsync(c => c.Id == dto.CategoryId))
-            throw new Exception("Category not found");
-        var rng = new Random();
-        const int batchSize = 1000;
-        var inserted = 0;
-        for (var i = 0; i < dto.Count; i += batchSize)
+        var batch = Enumerable.Range(0, Math.Min(batchSize, dto.Count - i)).Select(_ => new Domain.Entities.Product
         {
-            var batch = Enumerable.Range(0, Math.Min(batchSize, dto.Count - i)).Select(_ => new Domain.Entities.Product
-            {
-                Name = $"{Vendors[rng.Next(Vendors.Length)]} {Names[rng.Next(Names.Length)]} {rng.Next(1000, 9999)}",
-                CategoryId = dto.CategoryId,
-                QuantityPerUnit = Units[rng.Next(Units.Length)],
-                UnitPrice = Math.Round((decimal)(rng.NextDouble() * 9990 + 10), 2),
-                UnitsInStock = rng.Next(0, 500),
-                UnitsOnOrder = rng.Next(0, 50),
-                ReorderLevel = rng.Next(1, 20),
-                Discontinued = rng.Next(0, 10) == 0
-            }).ToList();
-            await _db.BulkInsertAsync(batch);
-            inserted += batch.Count;
-        }
-        return (inserted, $"Successfully inserted {inserted} products");
+            Name = $"{Vendors[rng.Next(Vendors.Length)]} {Names[rng.Next(Names.Length)]} {rng.Next(1000, 9999)}",
+            CategoryId = dto.CategoryId,
+            QuantityPerUnit = Units[rng.Next(Units.Length)],
+            UnitPrice = Math.Round((decimal)(rng.NextDouble() * 9990 + 10), 2),
+            UnitsInStock = rng.Next(0, 500),
+            UnitsOnOrder = rng.Next(0, 50),
+            ReorderLevel = rng.Next(1, 20),
+            Discontinued = rng.Next(0, 10) == 0
+        }).ToList();
+        await _db.Products.AddRangeAsync(batch);
+        await _db.SaveChangesAsync();
+        _db.ChangeTracker.Clear(); // ← evita acumulación de memoria
+        inserted += batch.Count;
     }
+    return (inserted, $"Successfully inserted {inserted} products");
 }
+}   

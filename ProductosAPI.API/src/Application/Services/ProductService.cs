@@ -105,7 +105,7 @@ public class ProductService
                 ReorderLevel = rng.Next(1, 20),
                 Discontinued = rng.Next(0, 10) == 0
             }).ToList();
-            await _db.Products.AddRangeAsync(batch);
+            await context.BulkInsertAsync(products);
             await _db.SaveChangesAsync();
             inserted += batch.Count;
         }

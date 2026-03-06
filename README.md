@@ -132,7 +132,7 @@ Se optó por una arquitectura en capas con separación clara entre `Domain`, `Ap
 Nunca se expone una entidad de Entity Framework directamente. Cada respuesta pasa por un DTO con un método estático `FromEntity()` que mapea explícitamente los campos, protegiendo el modelo de datos interno.
 
 ### 3. Bulk Insert por batches
-Para soportar la carga de 100.000 productos se insertan lotes de 1.000 registros usando `AddRangeAsync` + `SaveChangesAsync`. Esto reduce los roundtrips a la base de datos de 100.000 a ~100, logrando la inserción en segundos.
+Para soportar la carga de 100.000 productos se insertan lotes de 1.000 registros usando `AddRangeAsync` + `SaveChangesAsync` + `ChangeTracker.Clear()`. Esto reduce los roundtrips a la base de datos de 100.000 a ~100 y libera memoria entre batches, logrando la inserción completa en menos de 30 segundos.
 
 ### 4. JWT Stateless
 La autenticación es completamente stateless. El token JWT contiene el `username` en los claims, permitiendo que cualquier instancia de la API valide el token sin consultar la base de datos.
@@ -158,6 +158,18 @@ Internet → CDN/Load Balancer (AWS ALB)
 4. **Read replicas** en RDS para consultas GET de alta concurrencia
 5. **Cola de mensajes** (Azure Service Bus / AWS SQS) para bulk inserts mayores a 500k
 6. **CDN** (S3 + CloudFront) para servir el frontend React estático
+
+---
+
+## Pruebas
+```bash
+cd ProductosAPI.Tests
+dotnet test
+```
+
+- 9 pruebas unitarias (`ProductServiceTests`) — cubren CRUD, bulk insert y paginación
+- 2 pruebas de integración (`ProductsIntegrationTests`) — verifican autenticación y protección de endpoints
+- Total: **11/11 passing**
 
 ---
 

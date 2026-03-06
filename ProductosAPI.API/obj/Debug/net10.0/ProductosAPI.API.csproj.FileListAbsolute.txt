@@ -141,3 +141,4 @@ C:\Users\jszc0\OneDrive\Escritorio\ProductosDotnet\ProductosAPI.API\bin\Debug\ne
 C:\Users\jszc0\OneDrive\Escritorio\ProductosDotnet\ProductosAPI.API\bin\Debug\net10.0\NSwag.Generation.dll
 C:\Users\jszc0\OneDrive\Escritorio\ProductosDotnet\ProductosAPI.API\bin\Debug\net10.0\NSwag.Generation.AspNetCore.dll
 C:\Users\jszc0\OneDrive\Escritorio\ProductosDotnet\ProductosAPI.API\bin\Debug\net10.0\YamlDotNet.dll
+C:\Users\jszc0\OneDrive\Escritorio\ProductosDotnet\ProductosAPI.API\obj\Debug\net10.0\ProductosAPI.API.sourcelink.json

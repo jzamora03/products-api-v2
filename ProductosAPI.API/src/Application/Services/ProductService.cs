@@ -85,7 +85,7 @@ public class ProductService
         return true;
     }
 
-    public async Task<(int Inserted, string Message)> BulkCreateAsync(BulkCreateProductDto dto)
+ public async Task<(int Inserted, string Message)> BulkCreateAsync(BulkCreateProductDto dto)
     {
         if (!await _db.Categories.AnyAsync(c => c.Id == dto.CategoryId))
             throw new Exception("Category not found");
@@ -105,8 +105,7 @@ public class ProductService
                 ReorderLevel = rng.Next(1, 20),
                 Discontinued = rng.Next(0, 10) == 0
             }).ToList();
-            await context.BulkInsertAsync(products);
-            await _db.SaveChangesAsync();
+            await _db.BulkInsertAsync(batch);
             inserted += batch.Count;
         }
         return (inserted, $"Successfully inserted {inserted} products");
